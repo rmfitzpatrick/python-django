@@ -2,18 +2,11 @@
 language: python
 git:
   depth: 50 # Need old commits for determining version of untagged builds
-env: DJANGO=1.11.9
-matrix:
-  include:
-  - python: 2.7
-  - python: 3.4
-  - python: 2.7 # Old Middleware classes
-    env: DJANGO=1.9
-install:
-  - pip install Django==$DJANGO
-  - make bootstrap
-script:
-  - make test lint
+python:
+  - "2.7"
+  - "3.6"
+install: pip install tox-travis
+script: tox
 deploy:
   provider: pypi
   user: opentracing-contrib
