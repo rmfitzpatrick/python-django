@@ -26,8 +26,7 @@ class OpenTracingMiddleware(MiddlewareMixin):
         - Also, better to have try/catch with empty tracer or just fail
           fast if there's no tracer specified
         '''
-        self._init_tracing()
-        self._tracing = settings.OPENTRACING_TRACING
+        self._tracing = None
         self.get_response = get_response
 
     def _init_tracing(self):
@@ -68,6 +67,12 @@ class OpenTracingMiddleware(MiddlewareMixin):
             initialize_global_tracer(tracing)
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        # Lazily initialize the Tracer for compatibility with
+        # Jaeger and Django>=1.10
+        if self._tracing is None:
+            self._init_tracing()
+            self._tracing = settings.OPENTRACING_TRACER
+
         # determine whether this middleware should be applied
         # NOTE: if tracing is on but not tracing all requests, then the tracing
         # occurs through decorator functions rather than middleware
